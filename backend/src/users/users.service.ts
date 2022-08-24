@@ -1,16 +1,17 @@
 import {
   ConflictException,
+  HttpException,
   Injectable,
   InternalServerErrorException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { UserMapper } from './user.mapper';
+import { GetUserFilterDto } from './dtos/get-user-filter.dto';
 
 @Injectable()
 export class UsersService {
@@ -19,17 +20,54 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) {}
 
-  async getAll(): Promise<User[]> {
-    return this.usersRepository.find({
+  async getAll(userFilterDto: GetUserFilterDto) {
+    const skip = userFilterDto?.skip ? userFilterDto.skip : 0;
+    const take = userFilterDto?.take ? userFilterDto.take : 10;
+
+    let searchCondition = {};
+
+    if (userFilterDto && userFilterDto.username) {
+      searchCondition = {
+        username: Like(`%${userFilterDto.username}%`),
+      };
+    }
+
+    if (userFilterDto && userFilterDto.firstName) {
+      searchCondition = {
+        firstName: Like(`%${userFilterDto.firstName}%`),
+      };
+    }
+
+    if (userFilterDto && userFilterDto.lastName) {
+      searchCondition = {
+        lastName: Like(`%${userFilterDto.lastName}%`),
+      };
+    }
+
+    const [result, total] = await this.usersRepository.findAndCount({
       relations: {
         favorites: true,
       },
+      where: searchCondition,
+      order: {
+        createdAt: 1,
+      },
       select: ['favorites'],
+      skip: skip,
+      take: take,
     });
+
+    return {
+      users: result.map(UserMapper.mapOrmEntityToInterface),
+      count: total,
+    };
   }
 
   async getById(id: string) {
     const user = await this.usersRepository.findOne({ where: { id: id } });
+    if (!user) {
+      throw new HttpException(`Can not find user with id: ${id}`, 404);
+    }
     return UserMapper.mapOrmEntityToInterface(user);
   }
 
