@@ -1,21 +1,26 @@
-import { Album } from 'src/albums/album.entity';
+import { Album } from '../albums/album.entity';
 import {
   Entity,
   Column,
-  PrimaryGeneratedColumn,
   OneToOne,
   JoinTable,
+  OneToMany,
+  JoinColumn,
+  ManyToMany,
+  ManyToOne,
 } from 'typeorm';
+import { Artist } from '../artists/artist.entity';
+import { AbstractEntity } from '../parent.orm.entity';
 
 @Entity()
-export class Track {
-  @PrimaryGeneratedColumn()
-  id: string;
-
+export class Track extends AbstractEntity {
   @Column()
   name: string;
 
-  @OneToOne(() => Album)
+  @ManyToMany(() => Artist, (artist) => artist.tracks)
+  artists: Artist[];
+
+  @ManyToOne(() => Album, (album) => album.tracks)
   @JoinTable()
   album: Album;
 }

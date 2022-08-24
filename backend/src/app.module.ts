@@ -3,9 +3,18 @@ import { ConfigModule } from '@nestjs/config';
 import * as Joi from '@hapi/joi';
 import { DatabaseModule } from './config/database.module';
 import { UsersModule } from './users/users.module';
+import { FavoritesModule } from './favorites/favorites.module';
+import { AlbumsModule } from './albums/albums.module';
+import { ArtistsModule } from './artists/artists.module';
+import { TracksModule } from './tracks/tracks.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
+    FavoritesModule,
+    AlbumsModule,
+    ArtistsModule,
+    TracksModule,
     UsersModule,
     ConfigModule.forRoot({
       validationSchema: Joi.object({
@@ -18,8 +27,7 @@ import { UsersModule } from './users/users.module';
       }),
     }),
     DatabaseModule,
+    AuthModule,
   ],
-  controllers: [],
-  providers: [],
 })
 export class AppModule {}

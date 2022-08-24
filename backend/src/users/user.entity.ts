@@ -1,22 +1,21 @@
-// import { BaseEntity } from 'src/base.entity';
-import { Favorite } from 'src/favorites/favorite.entity';
-import {
-  Entity,
-  Column,
-  ManyToMany,
-  JoinTable,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { AbstractEntity } from '../parent.orm.entity';
+import { Favorite } from '../favorites/favorite.entity';
+import { Entity, Column, OneToMany } from 'typeorm';
 
 @Entity()
-export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+export class User extends AbstractEntity {
+  @Column()
+  firstName: string;
 
   @Column()
-  name: string;
+  lastName: string;
 
-  // @ManyToMany(() => Favorite)
-  // @JoinTable()
-  // favorites: Favorite[];
+  @Column({ unique: true })
+  username: string;
+
+  @Column()
+  password: string;
+
+  @OneToMany(() => Favorite, (entity) => entity.user)
+  favorites: Favorite[];
 }
