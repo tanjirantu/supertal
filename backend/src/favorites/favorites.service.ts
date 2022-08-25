@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Favorite } from './favorite.entity';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateFavoriteDto } from './dto/create-favorite.dto';
 import { Track } from '../tracks/track.entity';
 import { User } from '../users/user.entity';
+import { FavoriteMapper } from './favorite.mapper';
 
 @Injectable()
 export class FavoritesService {
@@ -15,23 +16,33 @@ export class FavoritesService {
     private tracksRepository: Repository<Track>,
   ) {}
 
-  getAll(): Promise<Favorite[]> {
-    return this.favoriteRepository.find();
+  async getAll(user: User) {
+    const [result, total] = await this.favoriteRepository.findAndCount({
+      where: { userId: user.id },
+      relations: {
+        track: true,
+      },
+    });
+
+    return {
+      favorites: result.map(FavoriteMapper.mapOrmEntityToInterface),
+      count: total,
+    };
   }
 
   async create(user: User, favoriteDto: CreateFavoriteDto) {
-    const tracks = await this.tracksRepository.find({
+    const track = await this.tracksRepository.findOne({
       where: {
-        id: In(favoriteDto.tracks),
+        id: favoriteDto.track,
       },
     });
-    const track = this.favoriteRepository.create({
+    const favorite = this.favoriteRepository.create({
       userId: user.id,
       label: favoriteDto.label,
-      tracks,
+      track,
     });
 
-    return track;
-    // return _track.save();
+    favorite.save();
+    return FavoriteMapper.mapOrmEntityToInterface(favorite);
   }
 }

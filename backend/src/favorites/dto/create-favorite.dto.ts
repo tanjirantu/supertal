@@ -7,5 +7,5 @@ export class CreateFavoriteDto {
   label: string;
 
   @IsOptional()
-  tracks: string[];
+  track: string;
 }

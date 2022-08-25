@@ -35,6 +35,9 @@ $ npm install
 ## Running the app
 
 ```bash
+# start database
+$ npm run start:dev:db
+
 # development
 $ npm run start
 

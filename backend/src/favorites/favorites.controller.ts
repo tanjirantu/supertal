@@ -10,8 +10,9 @@ export class FavoritesController {
   constructor(private favoritesService: FavoritesService) {}
 
   @Get()
-  getAll() {
-    return this.favoritesService.getAll();
+  @UseGuards(AuthGuard())
+  getAll(@GetUser() user: User) {
+    return this.favoritesService.getAll(user);
   }
 
   @Post()

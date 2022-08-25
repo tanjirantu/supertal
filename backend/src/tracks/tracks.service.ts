@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Track } from './track.entity';
 import { In, Repository } from 'typeorm';
@@ -8,6 +14,7 @@ import { Album } from '../albums/album.entity';
 import { GetTrackFilterDto } from './dtos/get-track-filter.dto';
 import { TrackMapper } from './track.mapper';
 import { UpdateTrackDto } from './dtos/update-track.dto';
+import { ArtistMapper } from '../artists/artist.mapper';
 
 @Injectable()
 export class TracksService {
@@ -48,7 +55,7 @@ export class TracksService {
     };
   }
 
-  async get(id: string) {
+  async getById(id: string) {
     const track = await this.tracksRepository.findOne({
       where: { id },
       relations: {
@@ -56,6 +63,16 @@ export class TracksService {
         artists: true,
       },
     });
+
+    if (!track) {
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_FOUND,
+          error: 'Track not found!',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
 
     return TrackMapper.mapOrmEntityToInterface(track);
   }
@@ -74,13 +91,13 @@ export class TracksService {
         id: In(track.artists),
       },
     });
-    const _track = this.tracksRepository.create({
+    const newTrack = this.tracksRepository.create({
       name: track.name,
-      artists: artists,
+      artists: artists.map(ArtistMapper.mapOrmEntityToInterface),
       album,
     });
 
-    return _track.save();
+    return newTrack.save();
   }
 
   async update(id: string, trackDto: UpdateTrackDto) {

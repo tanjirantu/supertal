@@ -8,6 +8,7 @@ class UserMapper {
       firstName: entity?.firstName,
       lastName: entity?.lastName,
       username: entity?.username,
+      createdAt: entity?.createdAt,
     };
   }
 }

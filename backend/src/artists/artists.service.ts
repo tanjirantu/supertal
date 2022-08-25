@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Artist } from './artist.entity';
 import { Repository } from 'typeorm';
 import { CreateArtistDto } from './dto/create-artist.dto';
+import { UpdateArtistDto } from './dto/update-artist-dto';
+import { ArtistMapper } from './artist.mapper';
 
 @Injectable()
 export class ArtistsService {
@@ -22,13 +24,27 @@ export class ArtistsService {
       skip: 0,
     });
     return {
-      artists: result,
+      artists: result.map(ArtistMapper.mapOrmEntityToInterface),
       count: total,
     };
   }
 
-  async create(artist: CreateArtistDto): Promise<Artist> {
-    return this.artistRepository.save(artist);
+  async getById(id: string) {
+    const artist = await this.artistRepository.findOne({ where: { id } });
+    return ArtistMapper.mapOrmEntityToInterface(artist);
+  }
+
+  async create(artist: CreateArtistDto) {
+    const newArtist = await this.artistRepository.save(artist);
+    return ArtistMapper.mapOrmEntityToInterface(newArtist);
+  }
+
+  async update(id: string, artistDto: UpdateArtistDto) {
+    const artist = await this.getById(id);
+    artist.name = artistDto.name;
+
+    const updatedArtist = await this.artistRepository.save(artist);
+    return ArtistMapper.mapOrmEntityToInterface(updatedArtist);
   }
 
   async remove(id: string): Promise<void> {

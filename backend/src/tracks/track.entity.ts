@@ -1,14 +1,5 @@
 import { Album } from '../albums/album.entity';
-import {
-  Entity,
-  Column,
-  OneToOne,
-  JoinTable,
-  OneToMany,
-  JoinColumn,
-  ManyToMany,
-  ManyToOne,
-} from 'typeorm';
+import { Entity, Column, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
 import { Artist } from '../artists/artist.entity';
 import { AbstractEntity } from '../parent.orm.entity';
 

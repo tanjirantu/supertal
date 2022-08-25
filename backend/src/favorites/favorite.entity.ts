@@ -6,6 +6,8 @@ import {
   ManyToOne,
   Column,
   JoinColumn,
+  OneToMany,
+  OneToOne,
 } from 'typeorm';
 import { User } from '../users/user.entity';
 import { AbstractEntity } from '../parent.orm.entity';
@@ -17,14 +19,13 @@ export class Favorite extends AbstractEntity {
 
   @Column()
   userId: string;
-
   @ManyToOne(() => User, (user) => user.favorites, {
     cascade: true,
   })
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @ManyToMany(() => Track)
-  @JoinTable()
-  tracks: Track[];
+  @OneToOne(() => Track, (track) => track.id)
+  @JoinColumn()
+  track: Track;
 }

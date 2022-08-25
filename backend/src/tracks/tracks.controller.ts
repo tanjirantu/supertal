@@ -14,8 +14,8 @@ export class TracksController {
   }
 
   @Get('/:id')
-  get(@Param('id') id: string) {
-    return this.tracksService.get(id);
+  getById(@Param('id') id: string) {
+    return this.tracksService.getById(id);
   }
 
   @Post()
